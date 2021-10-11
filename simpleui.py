@@ -10,11 +10,7 @@ Created on Fri Oct  1 22:07:22 2021
 import PySimpleGUI as sg
 import os.path
 import sys
-import pandas as pd
-#import os
 import platform
-
-
 
 #
 # Sous programmes
@@ -164,9 +160,7 @@ else:
 data = []
 headings = ['numéro','property','nb param', 'paramètres', 'valeur']
 
-
 sg.theme('Dark Blue 3')  # please make your windows colorful
-
 
 # First the window layout
 menu_def = [['Fichier',['Ouvrir', 'Save', 'Exit'  ]], ['Editer', ['Modifier','Inserer','Supprimer']]]
@@ -177,13 +171,12 @@ layout = [
           [sg.Table(values=data[1:][:], headings = headings,
     # Set column widths for empty record of table
             auto_size_columns=False,
-#            change_submits = True,
-#            col_widths=list(map(lambda x:len(x)+1, headings)),
-            key = 'Table',enable_click_events = True)],
+            key = 'Table',enable_click_events = True,
+            )],
           ]
 
 
-window = sg.Window("Vcard editor", layout )
+window = sg.Window("Vcard editor", layout, resizable=True, finalize=True )
 window2_active = False 
 
 #                   , size =(600,600))
@@ -203,48 +196,67 @@ while True:  # Event Loop
             fichdon
             data, nbc = litVcard(fichdon, fichres)
             window['Table'].update(data)
+            window['Table'].expand(True,True)
+            window['Table'].table_frame.pack(expand=True, fill='both')
         except:
             print("pas de fichier choisi")
             
 # edition: modification d'une ligne de données
-    if event == 'Modifier':
-        ligne = values['Table']
-        print("modification ligne : " + str(ligne[0]))
-#        data.insert(ligne[0],["insertion"])
-        window['Table'].update(data)
-            
-# edition: insertion d'une ligne de données
-    if not window2_active and event == 'Inserer' and not values['Table'] == []:
-        ligne = values['Table']
-        print("insertion ligne : " + str(ligne[0]))
-        window2_active = True
-        layout2 = [
-        [sg.Text('Données')], [sg.Text('Numéro',size = (15,1)),sg.Input()],
-        [sg.Text('Age', size =(15, 1)), sg.InputText()],
-        [sg.Text('Phone', size =(15, 1)), sg.InputText()],
-        [sg.Submit(button_text='Modifier', key = 'modif'), sg.Cancel(button_text = 'Annuler', key = 'annul')]
-          ]
-        window2 = sg.Window("Données", layout2)
-#        affichage fenetre pour insérer des données
-        if window2_active:
-            ev2, vals2 = window2.read()
-            print("event2: " + str(ev2) + " values2: "+ str(vals2))
-            if ev2 == sg.WIN_CLOSED or ev2 == 'Exit' or ev2 == 'annul':
-                window2_active  = False
-                window2.close()
-            if ev2 == 'modif':
-                newnum = vals2[0]
-                data.insert(ligne[0],[newnum])
-                window2_active  = False
-                window2.close()
+    try:
+        if event == 'Modifier':
+            ligne = values['Table']
+            print("modification ligne : " + str(ligne[0]))
+    #        data.insert(ligne[0],["insertion"])
+            window['Table'].update(data)
                 
-        window['Table'].update(data)
-# edition: suppression d'une ligne
-    if event == 'Supprimer':
-        ligne = values['Table']
-        print("suppression ligne : " + str(ligne[0]))
-        print("données : "+ str(data[ligne[0]]))
-        data.pop(ligne[0])
-        window['Table'].update(data)
-# fin du programme
+    # edition: insertion d'une ligne de données
+        if not window2_active and event == 'Inserer' and not values['Table'] == []:
+            ligne = values['Table']
+            print("insertion ligne : " + str(ligne[0]))
+            window2_active = True
+            layout2 = [
+            [sg.Text('Données')], [sg.Text('Numéro',size = (15,1)),sg.Input( #)],
+                enable_events=False, key='INNUM')],
+            [sg.Text('property', size =(15, 1)), sg.Input(
+                enable_events=False, key='INPROP')],
+            [sg.Text('nb param', size =(15, 1)), sg.Input(
+                enable_events=False, key='INNBPAR')],
+            [sg.Text('paramètre', size =(15, 1)), sg.Input(
+                enable_events=False, key='INPAR')],
+            [sg.Text('valeur', size =(15, 1)), sg.Input(
+                enable_events=False, key='INVAL')],
+            [sg.Submit(button_text='Inserer', key = 'inser'), sg.Cancel(button_text = 'Annuler', key = 'annul')]
+              ]
+            window2 = sg.Window("Données", layout2)
+    #        affichage fenetre pour insérer des données
+            if window2_active:
+                ev2, vals2 = window2.read()
+                print("event2: " + str(ev2) + " values2: "+ str(vals2))
+                if ev2 == sg.WIN_CLOSED or ev2 == 'Exit' or ev2 == 'annul':
+                    window2_active  = False
+                    window2.close()
+                if ev2 == 'inser':
+                    newnum = int(vals2['INNUM'])
+                    newprop = vals2['INPROP']
+                    newnbpar = int(vals2['INNBPAR'])
+                    newparam = []
+                    if vals2['INPAR'] != '': newparam = [vals2['INPAR']]
+                    newvalue = vals2['INVAL']
+                    newdata = [newnum, newprop,newnbpar,newparam,newvalue]
+                    data.insert(ligne[0],newdata)
+                    window2_active  = False
+                    window2.close()
+                    
+            window['Table'].update(data)
+    # edition: suppression d'une ligne
+        if event == 'Supprimer':
+            ligne = values['Table']
+            print("suppression ligne : " + str(ligne[0]))
+            print("données : "+ str(data[ligne[0]]))
+            data.pop(ligne[0])
+            window['Table'].update(data)
+    # fin du programme
+    except:
+        print("erreur édition")
+        
 window.close()
