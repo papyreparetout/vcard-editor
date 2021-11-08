@@ -10,7 +10,7 @@ Created on Fri Oct  1 22:07:22 2021
 import PySimpleGUI as sg
 import os.path
 import sys
-import platform
+# import platform
 import vcard_module as vm
 
 
@@ -63,7 +63,7 @@ while True:  # Event Loop
         except Exception as e:
             print("pas de fichier choisi")
             print(e, file = sys.stderr)
-            sg.popup('pas de fichier choisi!')
+            sg.popup('pas de fichier choisi!' + '\n'+ str(e))
             
 # edition: modification d'une ligne de données
     try:
@@ -166,7 +166,7 @@ while True:  # Event Loop
     except Exception as e:
         print("erreur édition")
         print(e, file = sys.stderr)
-        sg.popup('erreur edition')
+        sg.popup('erreur edition' + '\n' + str(e))
 
 # si option save on sauve le résultat dans un nouveau fichier
     if event == 'Save':
